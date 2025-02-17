@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to the Admin Dashboard</h1>
+    <p>User ID: {{ user_id }}</p>
+    <p>Role: {{ role }}</p>
+
+    <h2>Pending On Duty Requests</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="requestTableBody">
+            </tbody>
+    </table>
+
+    <script>
+        const requestTableBody = document.getElementById('requestTableBody');
+
+        async function fetchRequests() {try {
+            const response = await fetch('/on_duty_requests', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                }
+            });
+
+            if (response.ok) {
+                const requests = await response.json();
+            }
+                requestTableBody.innerHTML = ''; // Clear the table
+
+                for (const request of requests) {
+                    const row = requestTableBody.insertRow();
+                }
+                    // Get user info (you'll need to implement this)
+            }}
+            

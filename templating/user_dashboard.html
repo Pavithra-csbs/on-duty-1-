@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to the User Dashboard</h1>
+    <p>User ID: {{ user_id }}</p>
+    <p>Role: {{ role }}</p>
+
+    <h2>Your On Duty Requests</h2>
+    <form id="newRequestForm">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" required><br><br>
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" required><br><br>
+        <label for="reason">Reason:</label><br>
+        <textarea id="reason" name="reason" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit">Submit Request</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Reason</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="requestTableBody">
+            </tbody>
+    </table>
+
+    <script>
+        const requestForm = document.getElementById('newRequestForm');
+        const requestTableBody = document.getElementById('requestTableBody');
+
+        requestForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const reason = document.getElementById('reason').value;
+
+            try {
+                const response = await fetch('/on_duty_requests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                    },
+                    body: JSON.stringify({ start_date: startDate, end_date: endDate, reason: reason })
+                });
+
+                if (response.ok) {
+                    // Refresh the request table
+                    fetchRequests();
+                    requestForm.reset(); // Clear the form
+                } else {
+                    const errorData = await response.json();
+                    alert(errorData.detail);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            }
+        });
+
+        async function fetchRequests() {
+            try {
+                const response = await fetch('/on_duty_requests', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                    }
+                });
+
+                if (response.ok) {
+                    const requests = await response.json();
+                    requestTableBody.innerHTML = ''; // Clear the table
+                    requests.forEach(request => {
+                        const row = requestTableBody.insertRow();
+                        row.insertCell().textContent = request.start_date;
+                        row.insertCell().textContent = request.end_date;
+                        row.insertCell().textContent = request.reason;
+                        row.insertCell().textContent = request.status || "pending";
+                    });
+                } else {
+                    // Handle errors
+                }
+            } catch (error) {
+                console.error("Error fetching requests:", error);
+            }
+        }
+
+        // Fetch requests when the page loads
+        fetchRequests();
+
+    </script>
+</body>
+</html>
